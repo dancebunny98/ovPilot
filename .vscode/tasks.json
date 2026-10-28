@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Live ovPilot Rust",
+      "type": "shell",
+      "command": "${workspaceFolder}\\dev.bat",
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Build ovPilot Rust",
+      "type": "shell",
+      "command": "${workspaceFolder}\\build.bat",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Check ovPilot Rust",
+      "type": "shell",
+      "command": "${workspaceFolder}\\check.bat",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    }
+  ]
+}

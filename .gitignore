@@ -1,0 +1,17 @@
+/target/
+/.research/
+/.toolchain/
+/runtime/
+/logs/
+/release/
+/installer/*.exe
+/vendor/
+/docs/api/
+/.idea/
+*.suo
+*.user
+*.env
+.env.*
+settings.json
+*token*.json
+*credential*.json
