@@ -6,6 +6,19 @@ set "LOG=%CD%\logs\installer.log"
 >"%LOG%" echo [installer] Started %DATE% %TIME%
 call "%~dp0build.bat" >>"%LOG%" 2>&1
 if errorlevel 1 goto failed
+set "CARGO_CMD=cargo"
+if exist ".toolchain\cargo\bin\cargo.exe" (
+    set "CARGO_HOME=%CD%\.toolchain\cargo"
+    set "RUSTUP_HOME=%CD%\.toolchain\rustup"
+    set "PATH=%CD%\.toolchain\rustup\toolchains\stable-x86_64-pc-windows-gnu\lib\rustlib\x86_64-pc-windows-gnu\bin\self-contained;%CD%\.toolchain\cargo\bin;%PATH%"
+    set "CARGO_CMD=%CD%\.toolchain\cargo\bin\cargo.exe"
+)
+set "PRODUCT_VERSION="
+for /f "delims=" %%V in ('powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\package-version.ps1" "%CARGO_CMD%"') do set "PRODUCT_VERSION=%%V"
+if not defined PRODUCT_VERSION (
+    >>"%LOG%" echo ERROR: Could not read version from Cargo metadata.
+    goto failed
+)
 set "NSIS_CMD=makensis"
 if exist ".toolchain\nsis\nsis-3.11\makensis.exe" set "NSIS_CMD=%CD%\.toolchain\nsis\nsis-3.11\makensis.exe"
 if "%NSIS_CMD%"=="makensis" (
@@ -16,7 +29,7 @@ if "%NSIS_CMD%"=="makensis" (
     )
 )
 pushd installer
-"%NSIS_CMD%" /DSOURCE_EXE="..\release\ovPilot.exe" ovPilot.nsi >>"%LOG%" 2>&1
+"%NSIS_CMD%" /DPRODUCT_VERSION="%PRODUCT_VERSION%" /DSOURCE_EXE="..\release\ovPilot.exe" ovPilot.nsi >>"%LOG%" 2>&1
 if errorlevel 1 (
     popd
     goto failed

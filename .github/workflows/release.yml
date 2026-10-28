@@ -1,0 +1,125 @@
+name: Release ovPilot
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      publish: ${{ steps.version.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check package version and existing tag
+        id: version
+        shell: bash
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "ovpilot") | .version')
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Expected a stable major.minor.patch Cargo version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          existing=$(git ls-remote --tags origin "refs/tags/v${version}")
+          if [[ -n "$existing" ]]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "v${version} already has a tag; skipping release."
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: prepare
+    if: needs.prepare.outputs.publish == 'true'
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libwayland-dev libasound2-dev libssl-dev
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo test --locked
+      - run: cargo doc --no-deps --locked
+      - run: cargo build --release --locked
+      - name: Install NSIS
+        if: runner.os == 'Windows'
+        run: choco install nsis --yes --no-progress
+      - name: Build Windows installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        working-directory: installer
+        run: |
+          $version = '${{ needs.prepare.outputs.version }}'
+          & 'C:\Program Files (x86)\NSIS\makensis.exe' "/DPRODUCT_VERSION=$version" '/DSOURCE_EXE=..\target\release\ovPilot.exe' 'ovPilot.nsi'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Package Windows release
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = '${{ needs.prepare.outputs.version }}'
+          New-Item -ItemType Directory -Path package,release-assets | Out-Null
+          Copy-Item target/release/ovPilot.exe package/
+          Copy-Item data/aircraft_types-LICENSE package/AircraftTypes-LICENSE.txt
+          Copy-Item README.md package/
+          @{ version=$version; commit='${{ github.sha }}'; platform='Windows' } | ConvertTo-Json | Set-Content package/build-info.json
+          Compress-Archive -Path package/* -DestinationPath "release-assets/ovPilot-v$version-Windows.zip"
+          Copy-Item "installer/ovPilot-Setup-$version.exe" release-assets/
+      - name: Package Unix release
+        if: runner.os != 'Windows'
+        shell: bash
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          mkdir -p package release-assets
+          cp target/release/ovPilot package/
+          cp data/aircraft_types-LICENSE package/AircraftTypes-LICENSE.txt
+          cp README.md package/
+          printf '{"version":"%s","commit":"%s","platform":"%s"}\n' "$VERSION" "$GITHUB_SHA" "$RUNNER_OS" > package/build-info.json
+          tar -C package -czf "release-assets/ovPilot-v${VERSION}-${RUNNER_OS}.tar.gz" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ runner.os }}
+          path: release-assets/*
+          if-no-files-found: error
+
+  publish:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+      - name: Publish versioned release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          printf 'ovPilot %s\n\nSource commit: %s\n\nWindows installer and Windows, Linux, and macOS builds are attached. Each archive contains build-info.json with the exact version and commit ID. See README.md for current feature limits.\n' "$VERSION" "$GITHUB_SHA" > release-notes.md
+          gh release create "v${VERSION}" dist/* --target "$GITHUB_SHA" --title "ovPilot ${VERSION}" --notes-file release-notes.md

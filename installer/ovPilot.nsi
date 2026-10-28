@@ -3,9 +3,12 @@
 !ifndef SOURCE_EXE
   !define SOURCE_EXE "..\target\release\ovPilot.exe"
 !endif
+!ifndef PRODUCT_VERSION
+  !define PRODUCT_VERSION "1.0.0"
+!endif
 
-Name "ovPilot 1.0.0"
-OutFile "ovPilot-Setup-1.0.0.exe"
+Name "ovPilot ${PRODUCT_VERSION}"
+OutFile "ovPilot-Setup-${PRODUCT_VERSION}.exe"
 InstallDir "$LOCALAPPDATA\Programs\ovPilot"
 RequestExecutionLevel user
 Unicode true
@@ -26,8 +29,8 @@ Section "ovPilot" Main
   CreateDirectory "$SMPROGRAMS\ovPilot"
   CreateShortcut "$SMPROGRAMS\ovPilot\ovPilot.lnk" "$INSTDIR\ovPilot.exe"
   CreateShortcut "$SMPROGRAMS\ovPilot\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ovPilot" "DisplayName" "ovPilot 1.0.0"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ovPilot" "DisplayVersion" "1.0.0"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ovPilot" "DisplayName" "ovPilot ${PRODUCT_VERSION}"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ovPilot" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\ovPilot" "UninstallString" '"$INSTDIR\Uninstall.exe"'
 SectionEnd
 

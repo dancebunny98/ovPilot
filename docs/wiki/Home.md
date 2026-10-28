@@ -11,6 +11,7 @@ integration are being implemented.
 - [Build and run](Build-and-Run.md)
 - [Features and limits](Features-and-Limits.md)
 - [Privacy and credentials](Privacy-and-Credentials.md)
+- [Releases and versions](Releases.md)
 - [X-Plane 11/12 status](../XPLANE.md)
 - [Reference installer analysis](../ANALYSIS.md)
 

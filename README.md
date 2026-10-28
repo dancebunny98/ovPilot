@@ -29,6 +29,7 @@ Open this directory in VS Code or IntelliJ IDEA. On Windows, run `dev.bat` for a
 - [Build and run](docs/wiki/Build-and-Run.md)
 - [Features and limits](docs/wiki/Features-and-Limits.md)
 - [Privacy and credentials](docs/wiki/Privacy-and-Credentials.md)
+- [Releases and versions](docs/wiki/Releases.md)
 - [X-Plane 11/12 status](docs/XPLANE.md)
 - [Reference installer analysis](docs/ANALYSIS.md)
 
