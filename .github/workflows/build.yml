@@ -34,13 +34,16 @@ jobs:
         shell: pwsh
         working-directory: installer
         run: |
-          & 'C:\Program Files (x86)\NSIS\makensis.exe' '/DSOURCE_EXE=..\target\release\ovPilot.exe' 'ovPilot.nsi'
+          $metadata = cargo metadata --no-deps --format-version 1 | ConvertFrom-Json
+          $version = ($metadata.packages | Where-Object name -eq 'ovpilot' | Select-Object -First 1).version
+          & 'C:\Program Files (x86)\NSIS\makensis.exe' "/DPRODUCT_VERSION=$version" '/DSOURCE_EXE=..\target\release\ovPilot.exe' 'ovPilot.nsi'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
         with:
           name: ovPilot-${{ runner.os }}
           path: |
             target/release/ovPilot.exe
             target/release/ovPilot
-            installer/ovPilot-Setup-1.0.0.exe
+            installer/ovPilot-Setup-*.exe
             data/aircraft_types-LICENSE
             target/doc/

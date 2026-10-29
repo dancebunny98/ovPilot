@@ -12,6 +12,7 @@ integration are being implemented.
 - [Features and limits](Features-and-Limits.md)
 - [Privacy and credentials](Privacy-and-Credentials.md)
 - [Releases and versions](Releases.md)
+- [Network, chat, and voice status](Network-and-Voice.md)
 - [X-Plane 11/12 status](../XPLANE.md)
 - [Reference installer analysis](../ANALYSIS.md)
 

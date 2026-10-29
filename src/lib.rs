@@ -3,6 +3,7 @@
 mod atc;
 mod audio;
 mod auth;
+mod chat;
 mod config;
 mod fsd;
 mod matching;
@@ -12,6 +13,7 @@ mod update;
 mod xplane;
 
 pub use audio::{AudioDevices, MicrophoneLoopback, MicrophoneMonitor};
+pub use chat::{ChatChannel, ChatInbox, ChatMessage, OutgoingText};
 pub use config::{discover_model_roots, ClientSettings, SettingsStore};
 pub use fsd::{FsdDecoder, FsdMessage};
 pub use matching::{ModelCatalog, ModelMatcher, ModelRuleSet};

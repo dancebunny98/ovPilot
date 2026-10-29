@@ -12,6 +12,8 @@
   system credential vault.
 - Audio device selection, microphone test and monitor, and PTT key capture.
 - GitHub Releases version check and read-only X-Plane UDP telemetry probe.
+- Offline FSD text routing and `.msg` packet preparation, covered by local
+  tests. These packets are not sent until a network session exists.
 
 ## Incomplete
 
@@ -23,3 +25,6 @@ works end to end. X-Plane 11 and 12 have not been verified with a live simulator
 
 The type catalog is a source of suggestions, not a complete validation list:
 you can type a code that is not in the bundled data.
+
+See [network, chat, and voice status](Network-and-Voice.md) for the end-to-end
+requirements behind private chats and TX/RX activity.

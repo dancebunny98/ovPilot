@@ -4,7 +4,7 @@
   !define SOURCE_EXE "..\target\release\ovPilot.exe"
 !endif
 !ifndef PRODUCT_VERSION
-  !define PRODUCT_VERSION "1.0.0"
+  !error "Define PRODUCT_VERSION from Cargo.toml before building the installer"
 !endif
 
 Name "ovPilot ${PRODUCT_VERSION}"

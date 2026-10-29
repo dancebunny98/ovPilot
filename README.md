@@ -30,6 +30,7 @@ Open this directory in VS Code or IntelliJ IDEA. On Windows, run `dev.bat` for a
 - [Features and limits](docs/wiki/Features-and-Limits.md)
 - [Privacy and credentials](docs/wiki/Privacy-and-Credentials.md)
 - [Releases and versions](docs/wiki/Releases.md)
+- [Network, chat, and voice status](docs/wiki/Network-and-Voice.md)
 - [X-Plane 11/12 status](docs/XPLANE.md)
 - [Reference installer analysis](docs/ANALYSIS.md)
 
