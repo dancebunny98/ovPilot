@@ -28,7 +28,14 @@ jobs:
       - run: cargo build --release
       - name: Install NSIS
         if: runner.os == 'Windows'
-        run: choco install nsis --yes --no-progress
+        shell: pwsh
+        run: |
+          $makensis = 'C:\Program Files (x86)\NSIS\makensis.exe'
+          for ($attempt = 1; $attempt -le 3 -and -not (Test-Path $makensis); $attempt++) {
+            choco install nsis --yes --no-progress
+            if (-not (Test-Path $makensis)) { Start-Sleep -Seconds (10 * $attempt) }
+          }
+          if (-not (Test-Path $makensis)) { throw 'NSIS could not be installed after three attempts.' }
       - name: Build Windows installer
         if: runner.os == 'Windows'
         shell: pwsh
